@@ -43,20 +43,25 @@ select * from employee;
 
 
 -- 1) 부서의 모든 필드를 검색하라
-
+SELECT *
+FROM department;
 
 -- 2) 부서의 부서번호와 부서이름을 검색하라 (deptno는 부서번호, deptname은 부서이름 으로 검색)
-
+SELECT deptno, deptname
+FROM department;
 
 -- 3) 사원의 직급을 검색하라
-
+SELECT title
+FROM employee;
 
 * -- 4) 사원의 직급을 한번씩만 검색하라 (중복제거) (DISTINCT)
 SELECT DISTINCT title 
 FROM employee;
 
 -- 5) 2번 부서에 근무하는 사원들에 관한 모든 정보를 검색하라
-
+SELECT *
+FROM employee
+WHERE dno = 2;
 
 * -- 6) 이씨 성을 가진 사원들의 이름, 직급, 부서번호를 검색하라
 SELECT empname, title, dno
@@ -64,7 +69,9 @@ FROM employee
 WHERE empname LIKE '이%';
 
 -- 7) 직급이 과장이면서 1번 부서에서 근무하는 사원들의 이름과 급여를 검색하라
-
+SELECT empname, salary
+FROM employee
+WHERE title = '과장' AND dno = 1;
 
 * -- 8) 직급이 과장이면서 1번 부서에 속하지 않은 사원들의 이름과 급여를 검색하라
 SELECT empname, salary
@@ -73,10 +80,14 @@ WHERE title = '과장' and dno = 1;
 
 -- 9) 급여가 3000000원 이상이고, 4500000원 이하인 사원의 이름, 직급, 급여를 검색하라
 -- 9-1) BEWTEEN … AND 사용
-
+SELECT empname, title, salary
+FROM employee
+WHERE salary BETWEEN 3000000 AND 4500000;
 
 -- 9-2) 부등호 사용
-
+SELECT empname, title, salary
+FROM employee
+WHERE salary >= 3000000 AND salary <= 4500000;
 
 * -- 10) 1번 부서나 3번 부서에 소속된 사원들에 관한 모든 정보를 검색하라 (IN 사용)
 SELECT *
@@ -84,7 +95,11 @@ FROM employee
 WHERE DNO IN (1,3);
 
 -- 11) 직급이 과장인 사원들에 대하여 이름, 현재급여, 급여가 10% 인상됐을 때의 값을 검색하라
-
+SELECT empname,
+       salary AS "현재급여",
+       salary * 1.1 AS "10% 인상 후 급여"
+FROM employee
+WHERE title = '과장';
 
 * -- 12) 2번 부서에 근무하는 사원들의 급여, 직급, 이름을 검색하여 급여의 오름차순으로 정렬하라
 SELECT salary, title, empname
@@ -93,7 +108,9 @@ WHERE dno = 2
 ORDER BY salary ASC;
 
 -- 13) 사원들의 평균 급여와 최대급여를 검색하라
-
+SELECT AVG(salary) AS "평균 급여",
+       MAX(salary) AS "최대 급여"
+FROM employee;
 
 * -- 14) 사원들이 속한 부서번호별로 그룹화하고 부서번호, 평균급여, 최대급여를 검색하라
 SELECT  dno, ROUND(AVG(salary)), MAX(salary)
@@ -102,13 +119,28 @@ GROUP BY dno;
 
 -- 15) 사원들이 속한 부서번호별로 그룹화하고, 평균급여가 2500000원 이상인 
 -- 부서에 대해서 부서번호, 평균급여, 최대급여를 검색하라
-
+SELECT dno AS "부서번호",
+       AVG(salary) AS "평균급여",
+       MAX(salary) AS "최대급여"
+FROM employee
+GROUP BY dno
+HAVING AVG(salary) >= 2500000;
 
 -- 16-1) 김창섭이 속한 부서번호와 부서의 모든 부서번호를 합집합으로 검색하라 (UNION)
-
+SELECT   dno
+FROM     employee
+WHERE    empname = '김창섭'
+UNION
+SELECT     deptno
+FROM      department ;
 
 -- 16-2) 김창섭이 속한 부서번호와 부서의 모든 부서번호를 합집합으로 검색하라 (UNION ALL)
-
+SELECT   dno
+FROM     employee
+WHERE    empname = '김창섭'
+UNION ALL
+SELECT     deptno
+FROM      department ;
 
 * -- 17) 사원의 이름과 이 사원이 속한 부서이름을 검색하라 (조인)
 SELECT empname , deptname
@@ -116,8 +148,17 @@ FROM employee,department
 WHERE dno = deptno;
 
 -- 18) 사원에 대해서 사원이름과 직속상사의 이름을 검색하라(Self-Join)
-
+SELECT e.empname AS "사원명",
+       m.empname AS "직속상사"
+FROM employee e
+JOIN employee m ON e.manager = m.empno;
 
 -- 19) 사원에 대해서 부서이름, 사원이름, 직급, 급여를 검색하라.
 -- 부서이름에 대해서 오름차순, 부서이름이 같을 경우에는 salary에 대해서 내림차순으로 정렬하라
-
+SELECT d.deptname AS "부서이름",
+       e.empname AS "사원이름",
+       e.title AS "직급",
+       e.salary AS "급여"
+FROM employee e
+JOIN department d ON e.dno = d.deptno
+ORDER BY d.deptname ASC, e.salary DESC;
